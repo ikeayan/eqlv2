@@ -19,6 +19,7 @@ class EQLv2(nn.Module):
                  gamma=12,
                  mu=0.8,
                  alpha=4.0,
+                 discount = 0.965,
                  vis_grad=False):
         super().__init__()
         self.use_sigmoid = True
@@ -38,6 +39,8 @@ class EQLv2(nn.Module):
         self._pos_grad = None
         self._neg_grad = None
         self.pos_neg = None
+        
+        self.discount = discount
 
         def _func(x, gamma, mu):
             return 1 / (1 + torch.exp(-gamma * (x - mu)))
@@ -99,8 +102,8 @@ class EQLv2(nn.Module):
         dist.all_reduce(pos_grad)
         dist.all_reduce(neg_grad)
 
-        self._pos_grad += pos_grad
-        self._neg_grad += neg_grad
+        self._pos_grad = self.discount * self._pos_grad + pos_grad
+        self._neg_grad = self.discount * self._neg_grad + neg_grad
         self.pos_neg = self._pos_grad / (self._neg_grad + 1e-10)
 
     def get_weight(self, cls_score):
