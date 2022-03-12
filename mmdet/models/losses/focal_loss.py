@@ -30,7 +30,7 @@ class FocalLoss(nn.Module):
         self.alpha = alpha
         self.category_counts = pd.read_csv('category_counts.csv')
         self.total_count = sum(self.category_counts.counts)
-        self.s = torch.Tensor(self.total_count/self.category_counts.counts)[:-1]
+        self.s = torch.Tensor(self.total_count/self.category_counts.counts)
 
         # initial variables
         self._pos_grad = None
